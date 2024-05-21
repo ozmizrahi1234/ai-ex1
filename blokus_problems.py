@@ -69,11 +69,10 @@ class BlokusCornersProblem(SearchProblem):
         """"
         Returns True if and only if the state is a valid goal state
         """
-        # for x, y in self.corners:
-        #     if state.get_position(x, y) == -1:
-        #         return False
-        # return True
-        return all(state.get_position(x, y) != -1 for x, y in self.corners)
+        for x, y in self.corners:
+            if state.get_position(y, x) == -1:
+                return False
+        return True
 
     def get_successors(self, state):
         """
@@ -111,6 +110,7 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
+    # TODO: write this
 
 
 def get_piece_positions(state):
@@ -124,13 +124,13 @@ def get_piece_positions(state):
         piece_positions.append(piece.position)
     return piece_positions
 
+
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
 
         self.targets = targets.copy()
         self.expanded = 0
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
-
 
     def get_start_state(self):
         """
@@ -139,11 +139,6 @@ class BlokusCoverProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
-        for x, y in self.targets:
-            if state.get_position(x, y) == -1:
-                return False
-
         for x, y in self.targets:
             if state.get_position(y, x) == -1:
                 return False
@@ -153,7 +148,6 @@ class BlokusCoverProblem(SearchProblem):
         #         return False
         return True
 
-        # return all(state.get_position(x, y) != -1 for x, y in self.targets)
 
     def get_successors(self, state):
         """
@@ -176,7 +170,6 @@ class BlokusCoverProblem(SearchProblem):
         This method returns the total cost of a particular sequence of actions.  The sequence must
         be composed of legal moves
         """
-        "*** YOUR CODE HERE ***"
         return sum([action.piece.get_num_tiles() for action in actions])
 
 
