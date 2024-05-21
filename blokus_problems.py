@@ -2,7 +2,7 @@ from board import Board
 from search import SearchProblem, ucs
 import util
 from typing import *
-import numpy as np
+import numpy
 
 
 class BlokusFillProblem(SearchProblem):
