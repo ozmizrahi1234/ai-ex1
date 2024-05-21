@@ -52,6 +52,9 @@ Expanded nodes: 21940, score: 17
 
 
 [Blokus Corners Heuristic]
+python3 game.py -p tiny_set_2.txt -f astar -s 6 6 -z corners -H blokus_corners_heuristic
+Expanded nodes: 9420, score: 17
+
 
 
 

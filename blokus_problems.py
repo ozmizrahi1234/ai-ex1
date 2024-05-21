@@ -1,6 +1,8 @@
 from board import Board
 from search import SearchProblem, ucs
 import util
+from typing import *
+import numpy as np
 
 
 class BlokusFillProblem(SearchProblem):
@@ -112,7 +114,6 @@ def blokus_corners_heuristic(state, problem):
     """
     # TODO: write this
 
-
 def get_piece_positions(state):
     """
     Extract the current positions of all pieces from the state.
@@ -147,7 +148,6 @@ class BlokusCoverProblem(SearchProblem):
         #     if state.get_position(x, y) == -1:
         #         return False
         return True
-
 
     def get_successors(self, state):
         """
