@@ -56,9 +56,7 @@ class BlokusFillProblem(SearchProblem):
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
-        # initialize the list of the boards corners
-        self.corners = [(0, 0), (0, board_h - 1), (board_w - 1, 0), (board_w - 1, board_h - 1)]
-        # initialize the board
+        self.corners = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -128,6 +126,7 @@ def get_piece_positions(state):
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
+
         self.targets = targets.copy()
         self.expanded = 0
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
@@ -146,8 +145,12 @@ class BlokusCoverProblem(SearchProblem):
                 return False
 
         for x, y in self.targets:
-            if state.get_position(x, y) == -1:
+            if state.get_position(y, x) == -1:
                 return False
+        # for x, y in self.targets:
+        #     print(f"looking for row number {x} and col number {y}")
+        #     if state.get_position(x, y) == -1:
+        #         return False
         return True
 
         # return all(state.get_position(x, y) != -1 for x, y in self.targets)
