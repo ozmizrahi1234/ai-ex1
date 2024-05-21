@@ -100,30 +100,40 @@ class BlokusCornersProblem(SearchProblem):
         return sum([action.piece.get_num_tiles() for action in actions])
 
 
-def blokus_corners_heuristic(state, problem):
+def chebyshev_distance(point1, point2):
     """
-    Your heuristic for the BlokusCornersProblem goes here.
-
-    This heuristic must be consistent to ensure correctness.  First, try to come up
-    with an admissible heuristic; almost all admissible heuristics will be consistent
-    as well.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the other hand,
-    inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
+    returns the Chevyshev distance between two points.
     """
-    # TODO: write this
+    return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
+
 
 def get_piece_positions(state):
     """
-    Extract the current positions of all pieces from the state.
-    This function should be implemented based on how the state represents piece positions.
+    Returns the positions of all pieces on the board.
     """
     piece_positions = []
-    # Assuming state contains a list of placed pieces with their positions.
-    for piece in state.placed_pieces:
-        piece_positions.append(piece.position)
+    for x in range(state.board_w):
+        for y in range(state.board_h):
+            if state.get_position(y, x) == 0:
+                piece_positions.append((y, x))
     return piece_positions
+
+
+def blokus_corners_heuristic(state, problem):
+    """
+        A heuristic for the BlokusCornersProblem that you defined.
+
+        This heuristic should be consistent.
+        """
+    heuristic = 0
+
+    for corner in problem.corners:
+        min_distance = float('inf')
+        for piece in get_piece_positions(state):
+            distance = chebyshev_distance(corner, piece)
+            min_distance = min(distance, min_distance)
+        heuristic += min_distance
+    return heuristic
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -175,4 +185,4 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # TODO: write this
