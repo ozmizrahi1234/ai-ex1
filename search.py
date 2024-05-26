@@ -331,24 +331,6 @@ def generic_search(problem, generic):
             visited.add(node.get_state())
     return []
 
-    # visited = set()
-    # generic.push(Node(problem.get_start_state(), [], 0))
-    #
-    # while generic:
-    #     node = generic.pop()
-    #
-    #     if problem.is_goal_state(node.state):
-    #         return node.get_actions()
-    #
-    #     if node in visited:
-    #         continue
-    #
-    #     for successor, action, cost in problem.get_successors(node.get_state()):
-    #         generic.push(Node(successor, node.get_actions() + [action], node.get_cost() + cost))
-    #
-    #     visited.add(node)
-    # return []
-
 
 def depth_first_search(problem):
     """

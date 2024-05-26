@@ -2,11 +2,10 @@ import numpy as np
 import math
 from board import Board
 from search import SearchProblem, ucs
-import util
 from typing import *
-import numpy
 from typing import List
 import util
+from itertools import combinations
 
 
 class BlokusFillProblem(SearchProblem):
@@ -115,39 +114,74 @@ def chebyshev_distance(point1, point2):
     return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
 
 
-def blokus_corners_heuristic(state, problem):
-    # Get corners and board matrix
-    corners = problem.corners
+def is_covered(state, x, y):
+    """
+    Checks if the tile at position (x, y) is covered.
+
+    Args:
+        state: The state object that contains the grid.
+        x: The x-coordinate of the tile.
+        y: The y-coordinate of the tile.
+
+    Returns:
+        True if the tile at (x, y) is covered, False otherwise.
+    """
+    return state.state[x][y] != -1
+
+
+def blokus_corners_heuristic_chebyshev(state, problem):
+    uncovered_corners = [corner for corner in problem.corners if
+                         not is_covered(state, corner[0], corner[1])]
+    total_distance = 0
+
+    filled_tiles = np.argwhere(state.state != -1)
+    if len(filled_tiles) == 0:
+        return 0
+
+    for corner in uncovered_corners:
+        min_distance = float('inf')
+        for x, y in filled_tiles:
+            # distance = util.manhattanDistance(corner, (x, y))
+            distance = chebyshev_distance(corner, (x, y))
+            min_distance = min(min_distance, distance)
+        total_distance += min_distance
+
+    return total_distance
+
+
+def blokus_corners_heuristic_template(state, problem, targets):
     board_matrix = state.state
 
-    # Initialize variables
-    uncovered_corners = 0
+    uncovered_targets = 0
     pieces = problem.piece_list.pieces
     min_piece_size = math.inf
 
-    # Find the minimum piece size
     for p in pieces:
         min_piece_size = min(min_piece_size, p.num_tiles)
 
-    # Count the number of uncovered corners
-    for corner_x, corner_y in corners:
-        if board_matrix[corner_y][corner_x] == 0:  # This corner is already covered
-            continue
-        uncovered_corners += 1
+    for x, y in targets:
+        if board_matrix[y][x] != 0:  # This corner is already covered
+            uncovered_targets += 1
 
     # Calculate a multiplicative factor based on the minimum piece size and board size
-    mult_factor = min(min_piece_size, (min(problem.board_h, problem.board_w) + 1) / 2.0)
+    # we divide it because we want to make sure that the heuristic value is not too large
+    # and that it is not too small
+    mult_factor = min(min_piece_size, (min(problem.board_h, problem.board_w) + 1) / 2)
 
-    # Return the heuristic value
-    return mult_factor * uncovered_corners
+    return mult_factor * uncovered_targets
 
+
+def blokus_corners_heuristic(state, problem):
+    return blokus_corners_heuristic_template(state, problem, problem.corners)
 
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
-
         self.targets = targets.copy()
         self.expanded = 0
+        self.piece_list = piece_list
+        self.board_h = board_h
+        self.board_w = board_w
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -158,7 +192,7 @@ class BlokusCoverProblem(SearchProblem):
 
     def is_goal_state(self, state):
         for x, y in self.targets:
-            if state.state[y][x] == -1:
+            if state.state[x][y] == -1:
                 return False
         return True
 
@@ -187,5 +221,4 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
-    # TODO: write this
+    return blokus_corners_heuristic_template(state, problem, problem.targets)
