@@ -115,50 +115,31 @@ def chebyshev_distance(point1, point2):
 
 
 def blokus_corners_heuristic(state, problem):
-    """
-        A heuristic for the BlokusCornersProblem that you defined.
+    # Get corners and board matrix
+    corners = problem.corners
+    board_matrix = state.state
 
-    This heuristic should be consistent.
-    """
+    # Initialize variables
+    uncovered_corners = 0
+    pieces = problem.piece_list.pieces
+    min_piece_size = math.inf
 
-def blokus_heuristic_template(state, to_reach: List, corners: bool = False):
-    max_value = state.board_h * state.board_w
-    min_reach = np.array([max_value for i in to_reach])
-    flags = [False for i in to_reach]
-    board = state.state
-    for xy, element in np.ndenumerate(board):
-        if element != -1:
-            distances = check_distances_from_points(xy, to_reach, flags)
-            min_reach = np.minimum(min_reach, distances)
-    for i, flag in enumerate(flags):
-        if flag and min_reach[i] != 0:  # Check for false alarm, if the goal is occupied everything is good
-            return max_value
+    # Find the minimum piece size
+    for p in pieces:
+        min_piece_size = min(min_piece_size, p.num_tiles)
 
-    ## --- In the corners there might be max of 1 intercect (with valid pieces).
-    ## --- The minimum case that it would happen is with a distance if 4
-    if corners:
-        if state.board_h != state.board_w:
-            return np.max(min_reach)
-        res = np.sum(min_reach)
-        return res if res < 4 else res - 1
-    return np.max(min_reach)
+    # Count the number of uncovered corners
+    for corner_x, corner_y in corners:
+        if board_matrix[corner_y][corner_x] == 0:  # This corner is already covered
+            continue
+        uncovered_corners += 1
 
+    # Calculate a multiplicative factor based on the minimum piece size and board size
+    mult_factor = min(min_piece_size, (min(problem.board_h, problem.board_w) + 1) / 2.0)
 
-def check_distances_from_points(xy, points: List, flags) -> np.ndarray:
-    """
-    caclulates the distance between a point xy to all points
-    @param xy:
-    @param points:
-    @return: ndarray with the distance of the point from all the rest of the points
-    """
-    distances = []
-    for i, point in enumerate(points):
-        che_dist = chebyshev_distance(xy, point)
-        man_dist = util.manhattanDistance(xy, point)
-        if man_dist == 1:
-            flags[i] = True
-        distances.append(che_dist)
-    return np.array(distances)
+    # Return the heuristic value
+    return mult_factor * uncovered_corners
+
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -176,12 +157,8 @@ class BlokusCoverProblem(SearchProblem):
 
     def is_goal_state(self, state):
         for x, y in self.targets:
-            if state.get_position(y, x) == -1:
+            if state.state[y][x] == -1:
                 return False
-        # for x, y in self.targets:
-        #     print(f"looking for row number {x} and col number {y}")
-        #     if state.get_position(x, y) == -1:
-        #         return False
         return True
 
     def get_successors(self, state):
