@@ -113,6 +113,8 @@ def chebyshev_distance(point1, point2):
 
 
 
+
+
 def blokus_corners_heuristic(state, problem):
     """
         A heuristic for the BlokusCornersProblem that you defined.
