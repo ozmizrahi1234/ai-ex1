@@ -78,8 +78,9 @@ class BlokusCornersProblem(SearchProblem):
         """"
         Returns True if and only if the state is a valid goal state
         """
+        board_array = state.state
         for x, y in self.corners:
-            if state.state[y][x] == -1:
+            if board_array[y][x] == -1:
                 return False
         return True
 
