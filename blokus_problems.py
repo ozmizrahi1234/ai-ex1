@@ -1,3 +1,5 @@
+import numpy as np
+
 from board import Board
 from search import SearchProblem, ucs
 import util
@@ -58,7 +60,10 @@ class BlokusFillProblem(SearchProblem):
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.expanded = 0
-        self.corners = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
+        # self.corners = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
+        self.corners = [(0, 0), (board_w - 1, 0), (board_w - 1, board_h - 1), (0, board_h - 1)]
+
+
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -107,33 +112,53 @@ def chebyshev_distance(point1, point2):
     return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
 
 
-def get_piece_positions(state):
-    """
-    Returns the positions of all pieces on the board.
-    """
-    piece_positions = []
-    for x in range(state.board_w):
-        for y in range(state.board_h):
-            if state.get_position(y, x) == 0:
-                piece_positions.append((y, x))
-    return piece_positions
-
 
 def blokus_corners_heuristic(state, problem):
     """
         A heuristic for the BlokusCornersProblem that you defined.
 
-        This heuristic should be consistent.
-        """
-    heuristic = 0
+    This heuristic should be consistent.
+    """
 
-    for corner in problem.corners:
-        min_distance = float('inf')
-        for piece in get_piece_positions(state):
-            distance = chebyshev_distance(corner, piece)
-            min_distance = min(distance, min_distance)
-        heuristic += min_distance
-    return heuristic
+def blokus_heuristic_template(state, to_reach: List, corners: bool = False):
+    max_value = state.board_h * state.board_w
+    min_reach = np.array([max_value for i in to_reach])
+    flags = [False for i in to_reach]
+    board = state.state
+    for xy, element in np.ndenumerate(board):
+        if element != -1:
+            distances = check_distances_from_points(xy, to_reach, flags)
+            min_reach = np.minimum(min_reach, distances)
+    for i, flag in enumerate(flags):
+        if flag and min_reach[i] != 0:  # Check for false alarm, if the goal is occupied everything is good
+            return max_value
+
+    ## --- In the corners there might be max of 1 intercect (with valid pieces).
+    ## --- The minimum case that it would happen is with a distance if 4
+    if corners:
+        if state.board_h != state.board_w:
+            return np.max(min_reach)
+        res = np.sum(min_reach)
+        return res if res < 4 else res - 1
+    return np.max(min_reach)
+
+
+def check_distances_from_points(xy, points: List, flags) -> np.ndarray:
+    """
+    caclulates the distance between a point xy to all points
+    @param xy:
+    @param points:
+    @return: ndarray with the distance of the point from all the rest of the points
+    """
+    distances = []
+    for i, point in enumerate(points):
+        che_dist = chebyshev_distance(xy, point)
+        man_dist = util.manhattanDistance(xy, point)
+        if man_dist == 1:
+            flags[i] = True
+        distances.append(che_dist)
+    return np.array(distances)
+
 
 
 class BlokusCoverProblem(SearchProblem):
