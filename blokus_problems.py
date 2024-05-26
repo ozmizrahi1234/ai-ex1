@@ -1,10 +1,12 @@
 import numpy as np
-
+import math
 from board import Board
 from search import SearchProblem, ucs
 import util
 from typing import *
 import numpy
+from typing import List
+import util
 
 
 class BlokusFillProblem(SearchProblem):
@@ -59,11 +61,11 @@ class BlokusFillProblem(SearchProblem):
 #####################################################
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
+        self.piece_list = piece_list
+        self.board_h = board_h
+        self.board_w = board_w
         self.expanded = 0
-        # self.corners = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
-        self.corners = [(0, 0), (board_w - 1, 0), (board_w - 1, board_h - 1), (0, board_h - 1)]
-
-
+        self.corners = [(board_w - 1, board_h - 1), (board_w - 1, 0), (0, board_h - 1), (0, 0)]
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
 
     def get_start_state(self):
@@ -77,7 +79,7 @@ class BlokusCornersProblem(SearchProblem):
         Returns True if and only if the state is a valid goal state
         """
         for x, y in self.corners:
-            if state.get_position(y, x) == -1:
+            if state.state[y][x] == -1:
                 return False
         return True
 
@@ -110,9 +112,6 @@ def chebyshev_distance(point1, point2):
     returns the Chevyshev distance between two points.
     """
     return max(abs(point1[0] - point2[0]), abs(point1[1] - point2[1]))
-
-
-
 
 
 def blokus_corners_heuristic(state, problem):
@@ -160,7 +159,6 @@ def check_distances_from_points(xy, points: List, flags) -> np.ndarray:
             flags[i] = True
         distances.append(che_dist)
     return np.array(distances)
-
 
 
 class BlokusCoverProblem(SearchProblem):
